@@ -16,7 +16,7 @@ function LoginPage() {
         username,
         password,
       });
-      login(res.data); // Store token + user info
+      login(res.data); 
       navigate("/profile");
     } catch (err) {
       alert("Login failed!");
