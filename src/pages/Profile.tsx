@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import  { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {User} from '../types/user'
@@ -13,12 +12,8 @@ console.log(authUser)
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        //const res = await fetchProfile()
-        const res = await axios.get('https://dummyjson.com/auth/me', {
-          headers: {
-            Authorization: `Bearer ${authUser?.accessToken}`,
-          },
-       });
+        const res = await fetchProfile()
+
         setUser(res.data);
       } catch {
         toast.error('Failed to load profile');
