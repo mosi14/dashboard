@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { FaHome, FaUser, FaBox, FaCog, FaSignOutAlt } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaBars } from "react-icons/fa";
-import ThemeToggle from "./ThemeToggle";
+import NavItem from "./NavItem";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -20,19 +22,25 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="flex min-h-screen dark:bg-gray-900 dark:text-white">
       {/* Sidebar - Desktop */}
-      <aside className="w-64 bg-indigo-600 text-white p-4 hidden md:block">
-        <h2 className="text-xl font-bold mb-4">Dashboard</h2>
-        <nav className="space-y-2">
-          <Link to="/profile" className="block hover:underline">
-            Profile
-          </Link>
-          <Link to="/products" className="block hover:underline">
-            Products
-          </Link>
+
+      <aside className="h-screen w-64 bg-gray-900 text-white p-5 flex flex-col">
+        {/* LOGO */}
+
+        <div className="text-2xl font-bold text-center mb-8">My Dashboard</div>
+
+        {/* NAV LINKS */}
+        <nav className="flex flex-col gap-4">
+          <NavItem to="/home" icon={<FaHome />} label="Home" />
+          <NavItem to="/profile" icon={<FaUser />} label="Profile" />
+          <NavItem to="/products" icon={<FaBox />} label="Products" />
+          <NavItem to="/settings" icon={<FaCog />} label="Settings" />
+
+          {/* LOGOUT */}
           <button
             onClick={handleLogout}
-            className="text-red-300 hover:underline"
+            className="mt-auto flex items-center gap-3 p-3 text-red-400 hover:bg-red-600 hover:text-white rounded-lg transition"
           >
+            <FaSignOutAlt className="text-lg" />
             Logout
           </button>
         </nav>
@@ -91,7 +99,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <main className="flex-1 p-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold">My Dashboard</h1>
-          <ThemeToggle />
         </div>
         {children}
       </main>
