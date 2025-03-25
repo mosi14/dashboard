@@ -8,3 +8,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default ProtectedRoute;
+
+export const AuthRedirect = ({ children }: { children: React.JSX.Element }) => {
+  const { user } = useAuth();
+  return user ? <Navigate to="/home" /> : children;
+};

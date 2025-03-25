@@ -1,16 +1,25 @@
-import { Routes, Route } from "react-router";
-import ProtectedRoute from "./routes/ProtectedRoute";
+import { Routes, Route, Navigate } from "react-router";
+import ProtectedRoute, { AuthRedirect } from "./routes/ProtectedRoute";
 import ProductsPage from "./pages/Products";
 import LoginPage from "./pages/Login";
 import SettingsPage from "./pages/Settings";
 import HomePage from "./pages/Home";
 import Layout from "./components/Layout";
 import ProfilePage from "./pages/Profile";
+
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<Navigate to="/home" />} />
+        <Route
+          path="/login"
+          element={
+            <AuthRedirect>
+              <LoginPage />
+            </AuthRedirect>
+          }
+        />
         <Route
           path="/home"
           element={
@@ -51,6 +60,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>
   );
