@@ -5,7 +5,7 @@ const API = axios.create({
 });
 
 API.interceptors.request.use((config) => {
-    const userData = localStorage.getItem("user"); // Ensure we fetch latest data
+    const userData = localStorage.getItem("user"); 
     const token = userData ? JSON.parse(userData).accessToken : null;
   
     if (token) {
