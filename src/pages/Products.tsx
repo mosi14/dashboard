@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Product } from "../types/product";
 import { motion } from "framer-motion";
 import { fetchProducts } from "../api/product";
+import useDebounce from "../hooks/useDebounce"
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -12,6 +13,8 @@ const ProductsPage = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const itemsPerPage = 8;
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,9 +32,9 @@ const ProductsPage = () => {
 
   useEffect(() => {
     let data = [...products];
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       data = data.filter((p) =>
-        p.title.toLowerCase().includes(searchTerm.toLowerCase())
+        p.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
     }
     if (categoryFilter !== "all") {
@@ -39,7 +42,7 @@ const ProductsPage = () => {
     }
     setFiltered(data);
     setPage(1);
-  }, [searchTerm, categoryFilter, products]);
+  }, [debouncedSearchTerm, categoryFilter, products]);
 
   const paginated = filtered.slice(
     (page - 1) * itemsPerPage,
