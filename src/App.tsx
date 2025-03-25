@@ -2,6 +2,8 @@ import { Routes, Route } from "react-router";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import ProductsPage from "./pages/Products";
 import LoginPage from "./pages/Login";
+import SettingsPage from "./pages/Settings";
+import HomePage from "./pages/Home";
 import Layout from "./components/Layout";
 import ProfilePage from "./pages/Profile";
 function App() {
@@ -9,6 +11,16 @@ function App() {
     <>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <HomePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/products"
           element={
@@ -25,6 +37,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <ProfilePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SettingsPage />
               </Layout>
             </ProtectedRoute>
           }
