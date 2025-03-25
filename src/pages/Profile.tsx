@@ -1,48 +1,93 @@
-import  { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
-import {User} from '../types/user'
-import { fetchProfile } from '../api/user';
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { User } from "../types/user";
+import { fetchProfile } from "../api/user";
+import { motion } from "framer-motion";
+import {
+  FaUser,
+  FaEnvelope,
+  FaTransgender,
+  FaBirthdayCake,
+} from "react-icons/fa";
 
 const ProfilePage = () => {
-  const { user :authUser } = useAuth();
-console.log(authUser)
-    const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetchProfile()
+        const res = await fetchProfile();
 
         setUser(res.data);
       } catch {
-        toast.error('Failed to load profile');
+        toast.error("Failed to load profile");
       }
     };
     fetchUser();
   }, []);
 
-  if (!user) return  <div className="text-center text-xl animate-pulse">Loading profile...</div>;
+  if (!user)
+    return (
+      <div className="text-center text-xl animate-pulse">
+        Loading profile...
+      </div>
+    );
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-indigo-600">User Profile</h2>
-      <div className="flex items-center space-x-6">
-        <img
-          src={user.image}
-          alt="User"
-          className="w-24 h-24 rounded-full border-4 border-indigo-500"
-        />
-        <div>
-          <p><span className="font-semibold">Name:</span> {user.firstName} {user.lastName}</p>
-          <p><span className="font-semibold">Age:</span> {user.age}</p>
-          <p><span className="font-semibold">Gender:</span> {user.gender}</p>
-          <p><span className="font-semibold">Email:</span> {user.email}</p>
-        </div>
+    <motion.div
+      className="max-w-lg mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mt-10"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white">
+        Profile
+      </h2>
+
+      <div className="flex items-center justify-center mt-4">
+       
+        <img 
+        src={user.image}
+        alt="user"
+        className="w-24 h-24 rounded-full "/>
       </div>
-    </div>
+
+      <div className="mt-6 space-y-4">
+        <ProfileInfo
+          icon={<FaUser />}
+          label="Full Name"
+          value={`${user.firstName} ${user.lastName}`}
+        />
+        <ProfileInfo icon={<FaEnvelope />} label="Email" value={user.email} />
+        <ProfileInfo
+          icon={<FaTransgender />}
+          label="Gender"
+          value={user.gender}
+        />
+        <ProfileInfo icon={<FaBirthdayCake />} label="Age" value={user.age} />
+      </div>
+    </motion.div>
   );
 };
 
 export default ProfilePage;
 
+const ProfileInfo = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+}) => (
+  <div className="flex items-center space-x-4 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+    <span className="text-gray-600 dark:text-gray-300 text-xl">{icon}</span>
+    <div>
+      <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+      <p className="text-lg font-medium text-gray-900 dark:text-white">
+        {value}
+      </p>
+    </div>
+  </div>
+);
