@@ -1,4 +1,4 @@
-import API from "./client";
+import API from "./api";
 
 export const fetchProducts = () => API.get("/products?limit=100");
 
