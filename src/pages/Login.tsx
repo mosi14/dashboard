@@ -18,7 +18,7 @@ const LoginPage = () => {
       const res =  await loginUser(username, password);
       login(res.data)
       toast.success('Login successful');
-      navigate('/profile');
+      navigate('/home');
     } catch (err) {
       toast.error('Login failed');
     } finally {
