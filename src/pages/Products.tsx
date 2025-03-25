@@ -1,36 +1,18 @@
-import { useEffect, useState } from "react";
-import { Product } from "../types/product";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { fetchProducts } from "../api/product";
-import useDebounce from "../hooks/useDebounce"
+import useDebounce from "../hooks/useDebounce";
+import useFetchProducts from "../hooks/useFetchProducts";
 
 const ProductsPage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filtered, setFiltered] = useState<Product[]>([]);
+  const { products, categories, loading } = useFetchProducts();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const itemsPerPage = 8;
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetchProducts();
-      setProducts(res.data.products);
-      setFiltered(res.data.products);
-      const uniqueCategories: string[] = Array.from(
-        new Set(res.data.products.map((p: Product) => p.category))
-      );
-      setCategories(uniqueCategories);
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
+  const filtered = useMemo(() => {
     let data = [...products];
     if (debouncedSearchTerm) {
       data = data.filter((p) =>
@@ -40,15 +22,18 @@ const ProductsPage = () => {
     if (categoryFilter !== "all") {
       data = data.filter((p) => p.category === categoryFilter);
     }
-    setFiltered(data);
-    setPage(1);
+    return data;
   }, [debouncedSearchTerm, categoryFilter, products]);
 
-  const paginated = filtered.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage
-  );
+  const paginated = useMemo(() => {
+    return filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  }, [filtered, page, itemsPerPage]);
+
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchTerm, categoryFilter]);
 
   return (
     <div className="p-4">
