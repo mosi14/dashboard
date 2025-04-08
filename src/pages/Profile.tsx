@@ -1,7 +1,3 @@
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { User } from "../types/user";
-import { fetchProfile } from "../api/user";
 import { motion } from "framer-motion";
 import {
   FaUser,
@@ -9,27 +5,22 @@ import {
   FaTransgender,
   FaBirthdayCake,
 } from "react-icons/fa";
+import useFetchProfile from "../hooks/useFetchProfile";
 
 const ProfilePage = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, loading } = useFetchProfile();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetchProfile();
-
-        setUser(res.data);
-      } catch {
-        toast.error("Failed to load profile");
-      }
-    };
-    fetchUser();
-  }, []);
-
-  if (!user)
+  if (loading)
     return (
       <div className="text-center text-xl animate-pulse">
         Loading profile...
+      </div>
+    );
+
+  if (!user)
+    return (
+      <div className="text-center text-xl">
+        Failed to load profile
       </div>
     );
 
@@ -45,11 +36,11 @@ const ProfilePage = () => {
       </h2>
 
       <div className="flex items-center justify-center mt-4">
-       
         <img 
-        src={user.image}
-        alt="user"
-        className="w-24 h-24 rounded-full "/>
+          src={user.image}
+          alt="user"
+          className="w-24 h-24 rounded-full"
+        />
       </div>
 
       <div className="mt-6 space-y-4">
