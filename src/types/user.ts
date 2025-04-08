@@ -10,3 +10,10 @@ export interface User {
   refreshToken: string;
   accessToken: string;
 }
+
+
+export interface AuthUser extends User {
+  accessToken: string;
+  refreshToken: string;
+  tokenExpiry: number;
+}
