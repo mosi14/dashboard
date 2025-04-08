@@ -1,39 +1,50 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate, useLocation } from "react-router";
 import useDebounce from "../hooks/useDebounce";
 import useFetchProducts from "../hooks/useFetchProducts";
+import useFetchCategories from "../hooks/useFetchCategories";
 
 const ProductsPage = () => {
-  const { products, categories, loading } = useFetchProducts();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const params = new URLSearchParams(location.search);
+  const initialSearch = params.get("q") || "";
+  const initialCategory = params.get("category") || "all";
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [page, setPage] = useState(1);
-  const itemsPerPage = 8;
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  const filtered = useMemo(() => {
-    let data = [...products];
-    if (debouncedSearchTerm) {
-      data = data.filter((p) =>
-        p.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      );
-    }
-    if (categoryFilter !== "all") {
-      data = data.filter((p) => p.category === categoryFilter);
-    }
-    return data;
-  }, [debouncedSearchTerm, categoryFilter, products]);
+  //get category
+  const {
+    categories,
+    loading: loadingCategories,
+    error: categoriesError,
+  } = useFetchCategories();
 
-  const paginated = useMemo(() => {
-    return filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-  }, [filtered, page, itemsPerPage]);
-
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
   useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedSearchTerm) {
+      params.set("q", debouncedSearchTerm);
+    }
+    if (categoryFilter !== "all") {
+      params.set("category", categoryFilter);
+    }
+    navigate({ search: params.toString() });
+    // Reset to first page when search or filter changes.
     setPage(1);
-  }, [debouncedSearchTerm, categoryFilter]);
+  }, [debouncedSearchTerm, categoryFilter, navigate]);
+
+  const { products, total, loading, error } = useFetchProducts(
+    page,
+    debouncedSearchTerm,
+    categoryFilter
+  );
+
+  const totalPages = Math.ceil(total / 8);
 
   return (
     <div className="p-4">
@@ -45,22 +56,32 @@ const ProductsPage = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="p-2 border rounded-lg w-full md:w-1/2 dark:bg-gray-800 dark:text-white"
         />
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="p-2 border rounded-lg w-full md:w-1/4 dark:bg-gray-800 dark:text-white"
-        >
-          <option value="all">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat}>{cat}</option>
-          ))}
-        </select>
+        {loadingCategories ? (
+          <div>Loading categories...</div>
+        ) : categoriesError ? (
+          <div className="text-red-500">{categoriesError}</div>
+        ) : (
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="p-2 border rounded-lg w-full md:w-1/4 dark:bg-gray-800 dark:text-white"
+          >
+            <option value="all">All Categories</option>
+            {categories.map((cat, index) => (
+              <option key={`category-${index}`} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {loading ? (
         <div className="text-center text-xl animate-pulse">
           Loading products...
         </div>
+      ) : error ? (
+        <div className="text-center text-xl text-red-500">{error}</div>
       ) : (
         <motion.div
           initial={{ opacity: 0 }}
@@ -89,7 +110,7 @@ const ProductsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginated.map((product, index) => (
+                {products.map((product, index) => (
                   <tr
                     key={product.id}
                     className={`border dark:border-gray-700 ${
